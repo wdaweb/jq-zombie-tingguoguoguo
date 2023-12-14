@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link href="https://fonts.googleapis.com/css2?family=RocknRoll+One&display=swap" rel="stylesheet">
+</head>
+<style>
+  * {
+    font-family: 'RocknRoll One', sans-serif;
+  }
+
+  body {
+    height: 100vh;
+    background-image: url('./images/cake-frosting-texture-background.jpg');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+    overflow: hidden;
+  }
+
+  h1 {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 10px;
+  }
+
+  #btn-restart {
+    height: 48px;
+    width: 75px;
+    padding: 4px;
+    font-size: 1rem;
+    vertical-align: middle;
+    border-radius: 8px;
+
+  }
+
+
+
+
+  #happyCat {
+    cursor: pointer;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  #time,
+  #clicks {
+    user-select: none;
+  }
+</style>
+
+<body>
+  <audio id="happycatsound" src="./music/Happy Happy Happy Cat 1 HOUR (64 kbps).mp3" autoplay loop></audio>
+  <h1>Win by clicking this happy cat ten times !</h1>
+  <input type="button" value="Start" id="btn-restart"> <br>
+  <h1>Time:<span id="time"></span></h1> <br>
+  <h1>Clicks:<span id="clicks"></span></h1>
+  <br>
+  <img src="./images/happycat.gif" id="happyCat">
+
+
+
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.all.min.js'
+    integrity='sha512-zB7yJLSASiSevQmWCrQaq+z/f5zRIa884hwWgmK1oI3MfolIzKcpDtyfBsrGqUi/hMCObVwr/+SZTByOqh0zkQ=='
+    crossorigin='anonymous'></script>
+  <script src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js
+    integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    var direction = "right"
+    var offsetX = 550
+    var offsetY = 200
+    var intervalLength = 500
+    var clicks = 0
+    var gameStarted = false
+    let time = 0
+    let timer = 0
+
+
+    // 秒數計時
+    function startTimer() {
+      timer = setInterval(function () {
+        time += 10
+        updateTimerDisplay()
+      }, 10)
+    }
+    function updateTimerDisplay() {
+      const seconds = (time / 1000).toFixed(2)
+      $('#time').text(seconds)
+    }
+
+    function stopTimer() {
+      clearInterval(timer)
+    }
+    function resetTimer() {
+      stopTimer()
+      time = 0
+      updateTimerDisplay()
+    }
+
+
+    // happycat的移動軌跡
+    $('#happyCat').offset({ left: offsetX, top: offsetY })
+    var moveHappyCat = () => {
+      if (direction === "right") {
+        $('#happyCat').offset({ left: offsetX })
+        offsetX += 50
+        if (offsetX > 1150) {
+          direction = "down"
+        }
+      } else if (direction === "down") {
+        $('#happyCat').offset({ top: offsetY })
+        offsetY += 50
+        if (offsetY > 550) {
+          direction = "left"
+        }
+      } else if (direction === "left") {
+        $("#happyCat").offset({ left: offsetX });
+        offsetX -= 50
+        if (offsetX < 550) {
+          direction = "up";
+        }
+      } else if (direction === "up") {
+        $("#happyCat").offset({ top: offsetY });
+        offsetY -= 50
+        if (offsetY < 200) {
+          direction = "right";
+        }
+      }
+    }
+
+    // 每半秒執行一次移動
+    var intervalId = setInterval(moveHappyCat, intervalLength)
+
+    //happycat的點擊事件
+    $('#happyCat').click(() => {
+      if (gameStarted) {
+        clearInterval(intervalId);
+        intervalLength /= 1.51
+        clicks++
+        $('#clicks').text(clicks)
+        if (clicks >= 10) {
+          $('#happyCat').stop()
+          $('#happyCat').attr('src', './images/buttercat.png')
+          stopTimer()
+          $('#happycatsound').attr('src', './music/Cat Scream Sound Effect (64 kbps).mp3')
+
+          setTimeout(() => {
+            Swal.fire({
+              title: "You Win!",
+              text: "You defeated the happy happy happy cat!",
+              imageUrl: "./images/buttercat.png",
+              imageWidth: 150,
+              imageHeight: 200,
+              imageAlt: "Custom image"
+            });
+            $('.swal2-height-auto').css('height', '100vh')
+          }, 10)
+
+        } else {
+          intervalId = setInterval(moveHappyCat, intervalLength)
+        }
+      }
+    })
+
+    // 開始和重製遊戲按鈕
+    $('#btn-restart').click(() => {
+      if (!gameStarted) {
+        gameStarted = true
+        $('#happyCat').css('pointer-events', 'auto')
+      }
+      resetTimer()
+      startTimer()
+      $('#happyCat').attr('src', './images/happycat.gif')
+      $('#happycatsound').attr('src', './music/Happy Happy Happy Cat 1 HOUR (64 kbps).mp3')
+      clicks = 0
+      intervalLength = 500
+      $('#clicks').text(clicks)
+      clearInterval(intervalId);
+      intervalId = setInterval(moveHappyCat, intervalLength)
+      $('#btn-restart').val('Restart')
+    })
+
+
+
+  </script>
+</body>
+
+</html>
